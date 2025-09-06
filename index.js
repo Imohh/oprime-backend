@@ -1,51 +1,45 @@
-import express from "express";
-import cors from "cors";
-import nodemailer from "nodemailer";
+const express = require("express");
+const cors = require("cors");
+const nodemailer = require("nodemailer");
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+
 app.use(cors());
 app.use(express.json());
 
-// POST /api/send
+// Contact form endpoint
 app.post("/api/send", async (req, res) => {
-  const { name, email, message } = req.body;
+  const { email, subject, message } = req.body;
 
-  if (!name || !email || !message) {
-    return res.status(400).json({ success: false, error: "All fields are required" });
+  if (!email || !subject || !message) {
+    return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    // Configure your domain email (from cPanel)
     const transporter = nodemailer.createTransport({
-      host: "mail.oprimetech.com.ng", // your cPanel mail server
+      host: "smtp.gmail.com", // or your mail server
       port: 465,
       secure: true,
       auth: {
-        // user: "info@oprimetech.com.ng", // your domain email
-        user: process.env.EMAIL
-        pass: process.env.EMAIL_PASS   // password stored safely in Vercel
-      }
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
     });
 
     await transporter.sendMail({
-      from: `"${name}" <info@oprimetech.com.ng>`, 
-      to: "info@oprimetech.com.ng", // where the message is delivered
-      subject: "New Contact Form Message",
-      text: `From: ${name} (${email})\nMessage: ${message}`,
-      html: `
-        <h3>New Message from Website</h3>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Message:</strong> ${message}</p>
-      `
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER, // send to yourself
+      subject: `New message from ${email}: ${subject}`,
+      html: `<p><strong>From:</strong> ${email}</p>
+             <p><strong>Message:</strong> ${message}</p>`,
     });
 
-    res.json({ success: true, message: "Email sent successfully" });
+    res.status(200).json({ success: true, message: "Email sent!" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: "Failed to send email" });
+    console.error("Email error:", error);
+    res.status(500).json({ error: "Email failed to send" });
   }
 });
 
-// Vercel requires an export
-export default app;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
