@@ -29,7 +29,7 @@ app.post("/api/send", async (req, res) => {
     // });
 
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com", // or your mail server
+      host: "mail.oprimetech.com.ng", // or your mail server
       port: 465,
       secure: true,
       auth: {
@@ -39,8 +39,8 @@ app.post("/api/send", async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.EMAIL_USER, // send to yourself
+      from: "Oprime Tech info@oprimetech.com.ng",
+      to: "info@oprimetech.com.ng", // send to yourself
       subject: `New message from ${email}: ${subject}`,
       html: `<p><strong>From:</strong> ${email}</p>
              <p><strong>Message:</strong> ${message}</p>`,
