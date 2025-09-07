@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
+const Contact = require('./models/Contact');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,13 +18,23 @@ app.post("/api/send", async (req, res) => {
   }
 
   try {
+    // const transporter = nodemailer.createTransport({
+    //   host: "smtp.gmail.com", // or your mail server
+    //   port: 465,
+    //   secure: true,
+    //   auth: {
+    //     user: process.env.EMAIL_USER,
+    //     pass: process.env.EMAIL_PASS,
+    //   },
+    // });
+
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com", // or your mail server
       port: 465,
       secure: true,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: "info@oprimetech.com.ng",
+        pass: "Iamnotorious88@",
       },
     });
 
@@ -41,5 +52,32 @@ app.post("/api/send", async (req, res) => {
     res.status(500).json({ error: "Email failed to send" });
   }
 });
+
+app.post('/contact', async (req, res) => {
+  try {
+    const { fullName, email, message } = req.body;
+    const formEntry = new Contact({
+      subject,
+      email,
+      message,
+    });
+    await formEntry.save();
+    res.status(200).json({ message: 'Form data saved successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/contact', async (req, res) => {
+  try {
+    const contacts = await Contact.find(); // Assuming ContactForm is your Mongoose model
+    res.status(200).json(contacts);
+  } catch (error) {
+    console.error('Error getting contacts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
